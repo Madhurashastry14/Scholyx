@@ -44,7 +44,10 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'corsheaders',
+    
     'scholarships',
+    'accounts',
+    'eligibility',
 ]
 
 MIDDLEWARE = [
