@@ -1,3 +1,34 @@
 from django.contrib import admin
+from .models import (
+	Branch,
+	Category,
+	Course,
+	District,
+	RequiredDocument,
+	Scholarship,
+	State,
+)
 
-# Register your models here.
+
+class RequiredDocumentInline(admin.TabularInline):
+	model = RequiredDocument
+	extra = 0
+
+
+@admin.register(Scholarship)
+class ScholarshipAdmin(admin.ModelAdmin):
+	list_display = ("name", "provider", "amount", "deadline", "status")
+	list_filter = ("status", "gender", "year_of_study", "pwd", "minority")
+	search_fields = ("name", "provider")
+	filter_horizontal = ("category", "state", "district", "course", "branch")
+	inlines = (RequiredDocumentInline,)
+
+
+@admin.register(RequiredDocument)
+class RequiredDocumentAdmin(admin.ModelAdmin):
+	list_display = ("name", "scholarship", "is_mandatory")
+	list_filter = ("is_mandatory",)
+	search_fields = ("name", "scholarship__name")
+
+
+admin.site.register((Branch, Category, Course, District, State))
