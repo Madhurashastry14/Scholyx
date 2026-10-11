@@ -4,14 +4,15 @@ from django.db.models import F, Q
 
 
 class NamedEligibilityOption(models.Model):
-	name = models.CharField(max_length=100, unique=True)
+    code = models.CharField(max_length=100, unique=True, null=True)
+    name = models.CharField(max_length=100)
 
-	class Meta:
-		abstract = True
-		ordering = ("name",)
+    class Meta:
+        abstract = True
+        ordering = ("name",)
 
-	def __str__(self):
-		return self.name
+    def __str__(self):
+        return self.name
 
 
 class Category(NamedEligibilityOption):

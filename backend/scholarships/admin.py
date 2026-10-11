@@ -31,4 +31,7 @@ class RequiredDocumentAdmin(admin.ModelAdmin):
 	search_fields = ("name", "scholarship__name")
 
 
-admin.site.register((Branch, Category, Course, District, State))
+@admin.register(Branch, Category, Course, District, State)
+class EligibilityOptionAdmin(admin.ModelAdmin):
+    list_display = ("code", "name")
+    search_fields = ("code", "name")

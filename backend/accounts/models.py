@@ -134,16 +134,31 @@ class StudentProfile(models.Model):
             MinValueValidator(0),
             MaxValueValidator(100),
         ],
+        null=True,
+        blank=True,
+    )
+
+    cgpa = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        validators=[
+            MinValueValidator(0),
+            MaxValueValidator(10),
+        ],
+        null=True,
+        blank=True,
     )
 
     family_income = models.DecimalField(
         max_digits=12,
         decimal_places=2,
         validators=[MinValueValidator(0)],
+        null=True,
+        blank=True,
     )
 
-    pwd = models.BooleanField(default=False)
-    minority = models.BooleanField(default=False)
+    pwd = models.BooleanField(null=True, blank=True)
+    minority = models.BooleanField(null=True, blank=True)
 
     def __str__(self):
         return self.full_name
