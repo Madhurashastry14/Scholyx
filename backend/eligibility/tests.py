@@ -305,3 +305,31 @@ class EligibilityServiceTests(TestCase):
         result = evaluate_eligibility(self.scholarship, self.student)
         self.assertEqual(result["criteria"]["district"]["status"], "unknown")
         self.assertEqual(result["overall_status"], "incomplete")
+
+    def test_one_failed_requirement_makes_student_ineligible(self):
+        self.scholarship.maximum_family_income = 200000
+        self.scholarship.save()
+
+        self.student.family_income = 300000
+        self.student.save()
+
+        result = evaluate_eligibility(
+            self.scholarship,
+            self.student,
+        )
+
+        self.assertEqual(result["overall_status"], "ineligible")
+    def test_missing_required_info_returns_incomplete(self):
+        self.scholarship.minimum_cgpa = Decimal("7.00")
+        self.scholarship.save()
+
+        self.student.cgpa = None
+        self.student.save()
+
+        result = evaluate_eligibility(
+            self.scholarship,
+            self.student,
+        )
+
+        self.assertEqual(result["criteria"]["cgpa"]["status"], "unknown")
+        self.assertEqual(result["overall_status"], "incomplete")
