@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 
 from scholarships.models import Scholarship
 
@@ -120,6 +121,7 @@ class JWTAuthenticationTests(APITestCase):
 
         self.login_url = reverse("token_obtain_pair")
         self.refresh_url = reverse("token_refresh")
+        self.logout_url = reverse("logout")
         self.protected_url = reverse(
             "scholarship-eligibility",
             kwargs={"scholarship_id": self.scholarship.id},
@@ -173,6 +175,144 @@ class JWTAuthenticationTests(APITestCase):
             refresh_response.status_code, status.HTTP_200_OK
         )
         self.assertIn("access", refresh_response.data)
+
+    def test_authenticated_user_can_logout_and_blacklist_refresh_token(self):
+        login_response = self.client.post(
+            self.login_url,
+            {
+                "username": "jwt_test",
+                "password": "StrongTestPass!2026",
+            },
+            format="json",
+        )
+        refresh_token = login_response.data["refresh"]
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {login_response.data['access']}"
+        )
+
+        response = self.client.post(
+            self.logout_url,
+            {"refresh": refresh_token},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(BlacklistedToken.objects.count(), 1)
+        self.assertEqual(
+            self.client.get(self.protected_url).status_code,
+            status.HTTP_200_OK,
+        )
+
+    def test_blacklisted_refresh_token_cannot_be_reused(self):
+        login_response = self.client.post(
+            self.login_url,
+            {
+                "username": "jwt_test",
+                "password": "StrongTestPass!2026",
+            },
+            format="json",
+        )
+        refresh_token = login_response.data["refresh"]
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {login_response.data['access']}"
+        )
+
+        logout_response = self.client.post(
+            self.logout_url,
+            {"refresh": refresh_token},
+            format="json",
+        )
+        self.assertEqual(logout_response.status_code, status.HTTP_200_OK)
+
+        refresh_response = self.client.post(
+            self.refresh_url,
+            {"refresh": refresh_token},
+            format="json",
+        )
+
+        self.assertEqual(
+            refresh_response.status_code,
+            status.HTTP_401_UNAUTHORIZED,
+        )
+
+    def test_logout_rejects_unauthenticated_request(self):
+        response = self.client.post(
+            self.logout_url,
+            {"refresh": "not-a-valid-token"},
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_401_UNAUTHORIZED,
+        )
+
+    def test_logout_rejects_invalid_refresh_token(self):
+        login_response = self.client.post(
+            self.login_url,
+            {
+                "username": "jwt_test",
+                "password": "StrongTestPass!2026",
+            },
+            format="json",
+        )
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {login_response.data['access']}"
+        )
+
+        response = self.client.post(
+            self.logout_url,
+            {"refresh": "not-a-valid-token"},
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+    def test_logout_rejects_another_users_refresh_token(self):
+        other_user = User.objects.create_user(
+            username="other_jwt_test",
+            email="other_jwt_test@example.com",
+            password="AnotherStrongPass!2026",
+        )
+        other_login_response = self.client.post(
+            self.login_url,
+            {
+                "username": other_user.username,
+                "password": "AnotherStrongPass!2026",
+            },
+            format="json",
+        )
+        login_response = self.client.post(
+            self.login_url,
+            {
+                "username": "jwt_test",
+                "password": "StrongTestPass!2026",
+            },
+            format="json",
+        )
+        self.client.credentials(
+            HTTP_AUTHORIZATION=f"Bearer {login_response.data['access']}"
+        )
+
+        response = self.client.post(
+            self.logout_url,
+            {"refresh": other_login_response.data["refresh"]},
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+        refresh_response = self.client.post(
+            self.refresh_url,
+            {"refresh": other_login_response.data["refresh"]},
+            format="json",
+        )
+        self.assertEqual(refresh_response.status_code, status.HTTP_200_OK)
 
 
     def test_protected_endpoint_rejects_unauthenticated_request(self):

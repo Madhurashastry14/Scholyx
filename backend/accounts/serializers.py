@@ -2,8 +2,31 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from rest_framework import serializers
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.settings import api_settings
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import StudentProfile
+
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField(write_only=True)
+
+    def validate_refresh(self, value):
+        try:
+            token = RefreshToken(value)
+        except TokenError as exc:
+            raise serializers.ValidationError(
+                "Invalid or expired refresh token."
+            ) from exc
+        if str(token.get(api_settings.USER_ID_CLAIM)) != str(
+            self.context["request"].user.pk
+        ):
+            raise serializers.ValidationError(
+                "Refresh token does not belong to the authenticated user."
+            )
+        return token
+
 
 class RegistrationSerializer(serializers.ModelSerializer):
     username = serializers.CharField()
