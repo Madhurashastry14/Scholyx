@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'scholarships',
     'accounts',
     'eligibility',
+    'applications'
 ]
 
 MIDDLEWARE = [
