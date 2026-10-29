@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from .views import logout, register
+from .views import logout, register, my_profile
 
 urlpatterns = [
     path("register/", register, name="register"),
