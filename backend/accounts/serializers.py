@@ -91,3 +91,26 @@ class RegistrationSerializer(serializers.ModelSerializer):
         )
 
         return profile
+
+class StudentProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentProfile
+        fields = [
+            "id",
+            "full_name",
+            "date_of_birth",
+            "gender",
+            "state",
+            "district",
+            "category",
+            "course",
+            "branch",
+            "year_of_study",
+            "college",
+            "percentage",
+            "cgpa",
+            "family_income",
+            "pwd",
+            "minority",
+        ]
+        read_only_fields = ["id"]
