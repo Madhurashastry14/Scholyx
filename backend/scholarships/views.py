@@ -3,11 +3,13 @@ from rest_framework import generics
 from rest_framework.permissions import AllowAny
 
 from .models import Scholarship
-from .serializers import ScholarshipQuerySerializer, ScholarshipSerializer
-
-
+from .serializers import (
+    ScholarshipListSerializer,
+    ScholarshipQuerySerializer,
+    ScholarshipSerializer,
+)
 class ScholarshipListView(generics.ListAPIView):
-    serializer_class = ScholarshipSerializer
+    serializer_class = ScholarshipListSerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
