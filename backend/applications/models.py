@@ -10,6 +10,7 @@ class Application(models.Model):
 
     class Status(models.TextChoices):
         NOT_APPLIED = "NOT_APPLIED", "Not Applied"
+        INTERESTED = "INTERESTED", "Interested"
         APPLIED = "APPLIED", "Applied"
         UNDER_REVIEW = "UNDER_REVIEW", "Under Review"
         APPROVED = "APPROVED", "Approved"
