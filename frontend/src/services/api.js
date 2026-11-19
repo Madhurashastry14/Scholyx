@@ -1,3 +1,4 @@
+
 import { clearTokens, readTokens, writeTokens } from "./authStorage.js";
 
 const configuredBaseUrl = import.meta.env?.VITE_API_BASE_URL;
@@ -293,4 +294,22 @@ export function parseLoginError(error) {
   const message = readField(error.data, "detail");
 
   return message || "Login failed. Please try again.";
+}
+
+// PUBLIC SCHOLARSHIP LISTING API
+export function fetchScholarships(filters = {}) {
+  const params = new URLSearchParams();
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== "" && value !== null && value !== undefined) {
+      params.append(key, value);
+    }
+  });
+
+  const queryString = params.toString();
+  const endpoint = queryString
+    ? `scholarships/?${queryString}`
+    : "scholarships/";
+
+  return apiRequest(endpoint);
 }
