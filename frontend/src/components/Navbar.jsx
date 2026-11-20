@@ -21,12 +21,15 @@ function Navbar() {
       </button>
 
       <div className={`nav-links ${menuOpen ? "active" : ""}`}>
-        <a href="#scholarships" onClick={() => setMenuOpen(false)}>
+        <Link to="/" onClick={() => setMenuOpen(false)}>
+          Home
+        </Link>
+        <Link to="/scholarships" onClick={() => setMenuOpen(false)}>
           Scholarships
-        </a>
-        <a href="#about" onClick={() => setMenuOpen(false)}>
+        </Link>
+        <Link to="/about" onClick={() => setMenuOpen(false)}>
           About
-        </a>
+        </Link>
 
         <div className="nav-buttons">
           <Link to="/login" className="login-btn">
