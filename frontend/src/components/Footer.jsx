@@ -1,5 +1,6 @@
 
 import { Link } from "react-router-dom";
+import LogoMark from "./LogoMark";
 
 function Footer() {
   return (
@@ -7,7 +8,10 @@ function Footer() {
       <div className="footer-content">
         <div className="footer-brand">
           <Link to="/" className="logo">
-            Schol<span>yx</span>
+            <LogoMark />
+            <span className="logo-word">
+              Schol<span>yx</span>
+            </span>
           </Link>
           <p>
             Discover scholarships, check your eligibility,

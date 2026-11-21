@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import LogoMark from "./LogoMark";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -8,7 +9,10 @@ function Navbar() {
   return (
     <nav className="navbar">
       <Link to="/" className="logo">
-        Schol<span>yx</span>
+        <LogoMark />
+        <span className="logo-word">
+          Schol<span>yx</span>
+        </span>
       </Link>
 
       <button

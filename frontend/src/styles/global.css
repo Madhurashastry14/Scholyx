@@ -55,14 +55,53 @@ button {
 }
 
 .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36em;
   font-size: 27px;
   font-weight: 800;
   color: var(--navy);
   text-decoration: none;
 }
 
-.logo span {
+.logo-word span {
   color: var(--teal);
+}
+
+.logo-mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 1.4em;
+  height: 1.4em;
+  border-radius: 0.42em;
+  background: linear-gradient(140deg, #1b3a61, var(--teal));
+  box-shadow:
+    0 0.22em 0.55em rgba(20, 45, 78, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  transition: transform 0.18s ease;
+}
+
+.logo-mark svg {
+  display: block;
+  width: 1.08em;
+  height: 1.08em;
+}
+
+a:hover > .logo-mark,
+a:focus-visible > .logo-mark {
+  transform: translateY(-1px) scale(1.03);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-mark {
+    transition: none;
+  }
+
+  a:hover > .logo-mark,
+  a:focus-visible > .logo-mark {
+    transform: none;
+  }
 }
 
 .nav-links {
