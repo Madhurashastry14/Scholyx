@@ -1,3 +1,5 @@
+import { clearTokens, readTokens, writeTokens } from "./authStorage.js";
+
 const configuredBaseUrl = import.meta.env?.VITE_API_BASE_URL;
 
 export const API_BASE_URL = (
@@ -13,9 +15,12 @@ export class ApiError extends Error {
   }
 }
 
-export async function apiRequest(path, { method = "GET", body, signal } = {}) {
+export async function apiRequest(
+  path,
+  { method = "GET", body, signal, headers: extraHeaders } = {},
+) {
   const url = `${API_BASE_URL}/${String(path).replace(/^\/+/, "")}`;
-  const headers = { Accept: "application/json" };
+  const headers = { Accept: "application/json", ...extraHeaders };
 
   if (body !== undefined) {
     headers["Content-Type"] = "application/json";
@@ -69,6 +74,136 @@ export function registerStudent(
       email: typeof email === "string" ? email.trim() : "",
       password,
     },
+  });
+}
+
+let refreshPromise = null;
+
+function refreshAccessToken() {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    const tokens = readTokens();
+
+    if (!tokens?.refresh) {
+      clearTokens();
+      throw new ApiError("Your session has expired. Please log in again.", {
+        status: 401,
+      });
+    }
+
+    let data;
+
+    try {
+      data = await apiRequest("auth/refresh/", {
+        method: "POST",
+        body: { refresh: tokens.refresh },
+      });
+    } catch (error) {
+      if (error instanceof ApiError && [401, 403].includes(error.status)) {
+        clearTokens();
+        throw new ApiError("Your session has expired. Please log in again.", {
+          status: error.status,
+        });
+      }
+      throw error;
+    }
+
+    if (typeof data?.access !== "string" || !data.access) {
+      clearTokens();
+      throw new ApiError("Your session has expired. Please log in again.", {
+        status: 401,
+      });
+    }
+
+    writeTokens({
+      access: data.access,
+      refresh:
+        typeof data.refresh === "string" && data.refresh
+          ? data.refresh
+          : tokens.refresh,
+    });
+
+    return data.access;
+  })().finally(() => {
+    refreshPromise = null;
+  });
+
+  return refreshPromise;
+}
+
+export async function authRequest(path, { signal, ...options } = {}) {
+  const tokens = readTokens();
+
+  if (!tokens?.access) {
+    throw new ApiError("Please log in to continue.", { status: 401 });
+  }
+
+  try {
+    return await apiRequest(path, {
+      ...options,
+      signal,
+      headers: { Authorization: `Bearer ${tokens.access}` },
+    });
+  } catch (error) {
+    if (!(error instanceof ApiError) || error.status !== 401) {
+      throw error;
+    }
+
+    const access = await refreshAccessToken();
+
+    return apiRequest(path, {
+      ...options,
+      signal,
+      headers: { Authorization: `Bearer ${access}` },
+    });
+  }
+}
+
+export async function loginStudent(
+  { username, password } = {},
+  { signal } = {},
+) {
+  const data = await apiRequest("auth/login/", {
+    method: "POST",
+    signal,
+    body: {
+      username: typeof username === "string" ? username.trim() : "",
+      password,
+    },
+  });
+
+  if (
+    typeof data?.access !== "string" ||
+    !data.access ||
+    typeof data?.refresh !== "string" ||
+    !data.refresh
+  ) {
+    throw new ApiError("Login failed. Please try again.", { status: 500 });
+  }
+
+  writeTokens({ access: data.access, refresh: data.refresh });
+
+  return { access: data.access, refresh: data.refresh };
+}
+
+export function fetchProfile({ signal } = {}) {
+  return authRequest("profile/me/", { signal });
+}
+
+export async function logoutStudent({ signal } = {}) {
+  const tokens = readTokens();
+
+  if (!tokens?.refresh) {
+    return;
+  }
+
+  await authRequest("auth/logout/", {
+    method: "POST",
+    signal,
+    body: { refresh: tokens.refresh },
   });
 }
 
@@ -132,4 +267,30 @@ export function parseApiErrors(error) {
   }
 
   return { fieldErrors, message };
+}
+
+export function parseLoginError(error) {
+  if (!error) {
+    return "Login failed. Please try again.";
+  }
+
+  if (error.status === 0) {
+    return "Unable to reach the server. Check your connection and try again.";
+  }
+
+  if (error.status === 401) {
+    return "Incorrect username or password.";
+  }
+
+  if (error.status === 403) {
+    return "You do not have permission to log in.";
+  }
+
+  if (error.status >= 500) {
+    return "The server ran into a problem. Please try again.";
+  }
+
+  const message = readField(error.data, "detail");
+
+  return message || "Login failed. Please try again.";
 }

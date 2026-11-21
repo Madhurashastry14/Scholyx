@@ -21,8 +21,8 @@ function Footer() {
 
         <div className="footer-links">
           <h3>Quick Links</h3>
-          <a href="#scholarships">Scholarships</a>
-          <a href="#about">About Us</a>
+          <Link to="/scholarships">Scholarships</Link>
+          <Link to="/about">About Us</Link>
           <Link to="/login">Login</Link>
           <Link to="/register">Get Started</Link>
         </div>

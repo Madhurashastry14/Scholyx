@@ -1,9 +1,11 @@
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 function Home() {
+  const navigate = useNavigate();
   const [scholarships, setScholarships] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -168,7 +170,7 @@ function Home() {
           <h2>Ready to Find Your Opportunity?</h2>
           <p>Create your profile and start exploring scholarships today.</p>
           <button
-            onClick={() => window.location.href = "/register"}
+            onClick={() => navigate("/register")}
             className="cta-button"
           >
             Get Started →
