@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ScholarshipCard from "../components/ScholarshipCard";
 import ScholarshipFilters from "../components/ScholarshipFilters";
-import { fetchScholarships } from "../services/api";
+import { fetchScholarshipFilterOptions, fetchScholarships } from "../services/api";
 
 function Scholarships() {
   const [scholarships, setScholarships] = useState([]);
@@ -24,9 +24,45 @@ function Scholarships() {
     min_amount: "",
   });
 
+  const [filterOptions, setFilterOptions] = useState({
+    categories: [],
+    states: [],
+    courses: [],
+  });
+
   const [appliedFilters, setAppliedFilters] = useState({});
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadFilterOptions = async () => {
+      try {
+        const data = await fetchScholarshipFilterOptions({
+          signal: controller.signal,
+        });
+
+        setFilterOptions({
+          categories: data?.categories || [],
+          states: data?.states || [],
+          courses: data?.courses || [],
+        });
+      } catch (optionsError) {
+        if (optionsError?.name !== "AbortError") {
+          setFilterOptions({
+            categories: [],
+            states: [],
+            courses: [],
+          });
+        }
+      }
+    };
+
+    loadFilterOptions();
+
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     const loadScholarships = async () => {
@@ -73,6 +109,10 @@ function Scholarships() {
     setPage(1);
   };
 
+  const activeFilterCount = Object.values(appliedFilters).filter(
+    (value) => value !== "" && value !== null && value !== undefined,
+  ).length;
+
   const handleSearch = (event) => {
     event.preventDefault();
     setAppliedSearch(searchInput.trim());
@@ -104,6 +144,8 @@ function Scholarships() {
             <ScholarshipFilters
               filters={filters}
               setFilters={setFilters}
+              options={filterOptions}
+              activeCount={activeFilterCount}
               onApply={() => {
                 applyFilters();
                 setFiltersOpen(false);

@@ -313,3 +313,8 @@ export function fetchScholarships(filters = {}) {
 
   return apiRequest(endpoint);
 }
+
+// PUBLIC SCHOLARSHIP FILTER OPTIONS API
+export function fetchScholarshipFilterOptions({ signal } = {}) {
+  return apiRequest("scholarships/filter-options/", { signal });
+}
