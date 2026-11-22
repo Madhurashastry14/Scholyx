@@ -44,7 +44,7 @@ function Scholarships() {
         setTotalPages(
           Math.max(1, Math.ceil(data.count / 9))
         );
-      } catch (err) {
+      } catch {
         setError("Unable to load scholarships. Please try again.");
       } finally {
         setLoading(false);
