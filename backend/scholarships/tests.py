@@ -114,9 +114,9 @@ class ScholarshipAPITests(APITestCase):
         response = self.client.get(self.list_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(
-            response.data[0]["name"],
+            response.data["results"][0]["name"],
             "Active Scholarship",
         )
 
@@ -126,7 +126,7 @@ class ScholarshipAPITests(APITestCase):
         response = self.client.get(self.list_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, [])
+        self.assertEqual(response.data["results"], [])
 
     def test_detail_returns_scholarship_information(self):
         category = Category.objects.create(name="General")
@@ -235,9 +235,9 @@ class ScholarshipSearchAPITests(APITestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertIn(
                     expected.pk,
-                    [item["id"] for item in response.data],
+                    [item["id"] for item in response.data["results"]],
                 )
-                self.assertEqual(len(response.data), 3)
+                self.assertEqual(len(response.data["results"]), 3)
 
     def test_amount_deadline_and_active_filters(self):
         target = self.create_scholarship(
@@ -263,13 +263,13 @@ class ScholarshipSearchAPITests(APITestCase):
                 response = self.search(**params)
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(
-                    [item["id"] for item in response.data],
+                    [item["id"] for item in response.data["results"]],
                     [target.pk],
                 )
 
         response = self.search()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data["results"]), 2)
 
     def test_eligibility_filters_match_option_codes_and_values(self):
         target = self.create_scholarship(
@@ -295,7 +295,7 @@ class ScholarshipSearchAPITests(APITestCase):
                     response = self.search(**{field_name: value})
                     self.assertEqual(response.status_code, 200)
                     self.assertEqual(
-                        [item["id"] for item in response.data],
+                        [item["id"] for item in response.data["results"]],
                         [target.pk],
                     )
 
@@ -307,7 +307,7 @@ class ScholarshipSearchAPITests(APITestCase):
                 response = self.search(**params)
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(
-                    [item["id"] for item in response.data],
+                    [item["id"] for item in response.data["results"]],
                     [target.pk],
                 )
 
@@ -338,11 +338,14 @@ class ScholarshipSearchAPITests(APITestCase):
             year_of_study="2",
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual([item["id"] for item in response.data], [target.pk])
+        self.assertEqual(
+            [item["id"] for item in response.data["results"]],
+            [target.pk],
+        )
 
         response = self.search(search="does-not-exist")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, [])
+        self.assertEqual(response.data["results"], [])
 
     def test_invalid_query_values_return_bad_request(self):
         for params in (
