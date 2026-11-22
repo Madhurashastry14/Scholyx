@@ -1,5 +1,102 @@
+const AMOUNT_PRESETS = [
+  { label: "Any", value: "" },
+  { label: "₹10k+", value: "10000" },
+  { label: "₹50k+", value: "50000" },
+  { label: "₹1L+", value: "100000" },
+];
 
-function ScholarshipFilters({ filters, setFilters, onApply, onClear }) {
+const ICONS = {
+  category: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M20.6 13.4 12 22l-9-9V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z" />
+      <circle cx="7.5" cy="7.5" r="1.4" />
+    </svg>
+  ),
+  state: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z" />
+      <circle cx="12" cy="10" r="2.4" />
+    </svg>
+  ),
+  course: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5Z" />
+      <path d="M4 5.5v16" />
+    </svg>
+  ),
+  amount: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M6 4h12M6 8h12M15.5 8c0 3.2-2.4 5-6 5H6l8 7" />
+    </svg>
+  ),
+};
+
+function FilterLabel({ htmlFor, icon, children }) {
+  return (
+    <label htmlFor={htmlFor}>
+      <span className="filter-label-icon" aria-hidden="true">
+        {ICONS[icon]}
+      </span>
+      {children}
+    </label>
+  );
+}
+
+function SelectField({
+  id,
+  name,
+  label,
+  icon,
+  placeholder,
+  options,
+  value,
+  onChange,
+}) {
+  if (!options.length) {
+    return (
+      <div className="filter-group">
+        <FilterLabel htmlFor={id} icon={icon}>
+          {label}
+        </FilterLabel>
+        <input
+          id={id}
+          name={name}
+          type="text"
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="filter-group">
+      <FilterLabel htmlFor={id} icon={icon}>
+        {label}
+      </FilterLabel>
+      <div className="filter-select-wrap">
+        <select id={id} name={name} value={value} onChange={onChange}>
+          <option value="">All {label.toLowerCase()}</option>
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
+
+function ScholarshipFilters({
+  filters,
+  setFilters,
+  options = { categories: [], states: [], courses: [] },
+  activeCount,
+  onApply,
+  onClear,
+}) {
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -9,12 +106,26 @@ function ScholarshipFilters({ filters, setFilters, onApply, onClear }) {
     }));
   };
 
+  const setMinAmount = (value) => {
+    setFilters((previousFilters) => ({
+      ...previousFilters,
+      min_amount: value,
+    }));
+  };
+
   return (
     <aside className="scholarship-filters">
       <div className="filter-heading">
-        <h2>Filters</h2>
-        <button type="button" onClick={onClear}>
-          Clear All
+        <div className="filter-heading-title">
+          <h2>Filters</h2>
+          {activeCount > 0 && (
+            <span className="filter-count" aria-label={`${activeCount} filters applied`}>
+              {activeCount}
+            </span>
+          )}
+        </div>
+        <button type="button" className="clear-all-btn" onClick={onClear}>
+          Clear all
         </button>
       </div>
 
@@ -24,56 +135,90 @@ function ScholarshipFilters({ filters, setFilters, onApply, onClear }) {
           onApply();
         }}
       >
-        <div className="filter-group">
-          <label htmlFor="category">Category</label>
-          <input
-            id="category"
-            name="category"
-            type="text"
-            placeholder="Enter category"
-            value={filters.category}
-            onChange={handleChange}
-          />
-        </div>
+        <SelectField
+          id="category"
+          name="category"
+          label="Category"
+          icon="category"
+          placeholder="Enter category"
+          options={options.categories || []}
+          value={filters.category}
+          onChange={handleChange}
+        />
+
+        <SelectField
+          id="state"
+          name="state"
+          label="State"
+          icon="state"
+          placeholder="Enter state"
+          options={options.states || []}
+          value={filters.state}
+          onChange={handleChange}
+        />
+
+        <SelectField
+          id="course"
+          name="course"
+          label="Course"
+          icon="course"
+          placeholder="Enter course"
+          options={options.courses || []}
+          value={filters.course}
+          onChange={handleChange}
+        />
 
         <div className="filter-group">
-          <label htmlFor="state">State</label>
-          <input
-            id="state"
-            name="state"
-            type="text"
-            placeholder="Enter state"
-            value={filters.state}
-            onChange={handleChange}
-          />
-        </div>
+          <FilterLabel htmlFor="min_amount" icon="amount">
+            Minimum award
+          </FilterLabel>
+          <div className="amount-input">
+            <span className="amount-prefix" aria-hidden="true">
+              ₹
+            </span>
+            <input
+              id="min_amount"
+              name="min_amount"
+              type="number"
+              min="0"
+              inputMode="numeric"
+              placeholder="e.g. 50000"
+              value={filters.min_amount}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="amount-presets" role="group" aria-label="Minimum award presets">
+            {AMOUNT_PRESETS.map((preset) => {
+              const isActive =
+                preset.value === ""
+                  ? filters.min_amount === "" || filters.min_amount === "0"
+                  : String(filters.min_amount) === preset.value;
 
-        <div className="filter-group">
-          <label htmlFor="course">Course</label>
-          <input
-            id="course"
-            name="course"
-            type="text"
-            placeholder="Enter course"
-            value={filters.course}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="filter-group">
-          <label htmlFor="min_amount">Minimum Amount</label>
-          <input
-            id="min_amount"
-            name="min_amount"
-            type="number"
-            min="0"
-            placeholder="Enter minimum amount"
-            value={filters.min_amount}
-            onChange={handleChange}
-          />
+              return (
+                <button
+                  key={preset.label}
+                  type="button"
+                  className={`preset-btn${isActive ? " active" : ""}`}
+                  aria-pressed={isActive}
+                  onClick={() => setMinAmount(preset.value)}
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <button type="submit" className="apply-filters-btn">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.9"
+            aria-hidden="true"
+          >
+            <path d="M4 5h16l-6.2 7.4V19l-3.6 2v-8.6L4 5Z" />
+          </svg>
           Apply Filters
         </button>
       </form>
