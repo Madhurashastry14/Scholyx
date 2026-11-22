@@ -34,6 +34,7 @@ function Scholarships() {
   const [appliedFilters, setAppliedFilters] = useState({});
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -78,6 +79,7 @@ function Scholarships() {
         });
 
         setScholarships(data.results || []);
+        setTotalCount(data.count || 0);
         setTotalPages(
           Math.max(1, Math.ceil(data.count / 9))
         );
@@ -193,6 +195,12 @@ function Scholarships() {
               onRemove={removeFilter}
               onClearAll={clearFilters}
             />
+
+            {!loading && !error && totalCount > 0 && (
+              <p className="results-summary">
+                Showing {scholarships.length} of {totalCount} scholarships
+              </p>
+            )}
 
             {loading && (
               <p className="status-message">

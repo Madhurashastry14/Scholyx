@@ -325,6 +325,13 @@
 
 /* SEARCH */
 
+.results-summary {
+  margin-bottom: 14px;
+  color: var(--secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .scholarship-search {
   display: flex;
   gap: 10px;
