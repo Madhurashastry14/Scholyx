@@ -399,13 +399,20 @@ class ScholarshipFilterOptionsTests(APITestCase):
 
     def test_returns_only_options_used_by_active_scholarships(self):
         active = self.create_scholarship("Active")
-        self.create_scholarship("Draft", status=Scholarship.Status.DRAFT)
+        draft = self.create_scholarship(
+            "Draft",
+            status=Scholarship.Status.DRAFT,
+        )
         active.category.add(Category.objects.create(code="OBC", name="OBC"))
         active.state.add(State.objects.create(code="KA", name="Karnataka"))
         active.course.add(
             Course.objects.create(code="BE_BTECH", name="Engineering")
         )
-        Category.objects.create(code="SC", name="Scheduled Caste")
+        draft.category.add(
+            Category.objects.create(code="SC", name="Scheduled Caste")
+        )
+        draft.state.add(State.objects.create(code="TN", name="Tamil Nadu"))
+        draft.course.add(Course.objects.create(code="MBBS", name="Medicine"))
 
         response = self.client.get(self.url)
 

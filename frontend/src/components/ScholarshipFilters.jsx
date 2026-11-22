@@ -51,8 +51,10 @@ function SelectField({
   options,
   value,
   onChange,
+  status,
+  allLabel,
 }) {
-  if (!options.length) {
+  if (status === "failed") {
     return (
       <div className="filter-group">
         <FilterLabel htmlFor={id} icon={icon}>
@@ -76,8 +78,16 @@ function SelectField({
         {label}
       </FilterLabel>
       <div className="filter-select-wrap">
-        <select id={id} name={name} value={value} onChange={onChange}>
-          <option value="">All {label.toLowerCase()}</option>
+        <select
+          id={id}
+          name={name}
+          value={value}
+          onChange={onChange}
+          disabled={status === "loading"}
+        >
+          <option value="">
+            {status === "loading" ? "Loading options…" : allLabel}
+          </option>
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -93,10 +103,14 @@ function ScholarshipFilters({
   filters,
   setFilters,
   options = { categories: [], states: [], courses: [] },
+  optionsStatus = "loading",
   activeCount,
   onApply,
   onClear,
 }) {
+  const amountValue =
+    filters.min_amount === "" ? null : Number(filters.min_amount);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -144,6 +158,8 @@ function ScholarshipFilters({
           options={options.categories || []}
           value={filters.category}
           onChange={handleChange}
+          status={optionsStatus}
+          allLabel="All categories"
         />
 
         <SelectField
@@ -155,6 +171,8 @@ function ScholarshipFilters({
           options={options.states || []}
           value={filters.state}
           onChange={handleChange}
+          status={optionsStatus}
+          allLabel="All states"
         />
 
         <SelectField
@@ -166,6 +184,8 @@ function ScholarshipFilters({
           options={options.courses || []}
           value={filters.course}
           onChange={handleChange}
+          status={optionsStatus}
+          allLabel="All courses"
         />
 
         <div className="filter-group">
@@ -191,8 +211,9 @@ function ScholarshipFilters({
             {AMOUNT_PRESETS.map((preset) => {
               const isActive =
                 preset.value === ""
-                  ? filters.min_amount === "" || filters.min_amount === "0"
-                  : String(filters.min_amount) === preset.value;
+                  ? amountValue === null || amountValue === 0
+                  : Number.isFinite(amountValue) &&
+                    amountValue === Number(preset.value);
 
               return (
                 <button

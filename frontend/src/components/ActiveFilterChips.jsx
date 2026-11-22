@@ -54,7 +54,7 @@ function ActiveFilterChips({
   }
 
   return (
-    <div className="active-filters" aria-label="Active filters">
+    <div className="active-filters" role="group" aria-label="Active filters">
       {entries.map(({ key, label, text }) => (
         <span className="filter-chip" key={key}>
           <span>

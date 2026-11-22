@@ -41,8 +41,6 @@
 /* FILTER PANEL */
 
 .scholarship-filters {
-  position: sticky;
-  top: 96px;
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -282,14 +280,14 @@
 }
 
 .filter-chip > span {
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .filter-chip button {
   display: inline-grid;
   place-items: center;
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: transparent;
   color: var(--secondary);
@@ -475,7 +473,6 @@
   }
 
   .scholarship-filters {
-    position: static;
     width: 100%;
   }
 
@@ -517,6 +514,8 @@
 }
 
 .filter-panel {
+  position: sticky;
+  top: 96px;
   min-width: 0;
 }
 
@@ -526,6 +525,8 @@
   }
 
   .filter-panel {
+    position: static;
+    top: auto;
     display: none;
   }
 

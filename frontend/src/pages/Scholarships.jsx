@@ -30,6 +30,7 @@ function Scholarships() {
     states: [],
     courses: [],
   });
+  const [optionsStatus, setOptionsStatus] = useState("loading");
 
   const [appliedFilters, setAppliedFilters] = useState({});
   const [page, setPage] = useState(1);
@@ -50,6 +51,7 @@ function Scholarships() {
           states: data?.states || [],
           courses: data?.courses || [],
         });
+        setOptionsStatus("ready");
       } catch (optionsError) {
         if (optionsError?.name !== "AbortError") {
           setFilterOptions({
@@ -57,6 +59,7 @@ function Scholarships() {
             states: [],
             courses: [],
           });
+          setOptionsStatus("failed");
         }
       }
     };
@@ -67,6 +70,8 @@ function Scholarships() {
   }, []);
 
   useEffect(() => {
+    let ignore = false;
+
     const loadScholarships = async () => {
       try {
         setLoading(true);
@@ -78,19 +83,31 @@ function Scholarships() {
           page,
         });
 
+        if (ignore) {
+          return;
+        }
+
         setScholarships(data.results || []);
         setTotalCount(data.count || 0);
         setTotalPages(
           Math.max(1, Math.ceil(data.count / 9))
         );
       } catch {
-        setError("Unable to load scholarships. Please try again.");
+        if (!ignore) {
+          setError("Unable to load scholarships. Please try again.");
+        }
       } finally {
-        setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
     };
 
     loadScholarships();
+
+    return () => {
+      ignore = true;
+    };
   }, [appliedSearch, appliedFilters, page]);
 
   const applyFilters = () => {
@@ -160,6 +177,7 @@ function Scholarships() {
               filters={filters}
               setFilters={setFilters}
               options={filterOptions}
+              optionsStatus={optionsStatus}
               activeCount={activeFilterCount}
               onApply={() => {
                 applyFilters();
