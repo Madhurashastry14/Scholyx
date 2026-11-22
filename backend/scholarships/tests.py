@@ -153,6 +153,7 @@ class ScholarshipAPITests(APITestCase):
             response.data["application_url"],
             "https://example.com/apply",
         )
+        self.assertEqual(response.data["status"], Scholarship.Status.ACTIVE)
         self.assertEqual(
             response.data["minimum_percentage"],
             "75.00",

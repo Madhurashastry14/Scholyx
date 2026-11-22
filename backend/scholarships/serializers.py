@@ -47,6 +47,7 @@ class ScholarshipSerializer(serializers.ModelSerializer):
             "description",
             "amount",
             "deadline",
+            "status",
             "official_website",
             "application_url",
             "minimum_percentage",
