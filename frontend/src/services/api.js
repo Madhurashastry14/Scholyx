@@ -314,6 +314,11 @@ export function fetchScholarships(filters = {}) {
   return apiRequest(endpoint);
 }
 
+// PUBLIC SCHOLARSHIP DETAIL API
+export function fetchScholarshipDetails(id, { signal } = {}) {
+  return apiRequest(`scholarships/${encodeURIComponent(id)}/`, { signal });
+}
+
 // PUBLIC SCHOLARSHIP FILTER OPTIONS API
 export function fetchScholarshipFilterOptions({ signal } = {}) {
   return apiRequest("scholarships/filter-options/", { signal });
