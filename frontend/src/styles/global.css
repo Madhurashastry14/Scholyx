@@ -436,6 +436,19 @@ a:focus-visible > .logo-mark {
   background: #D0EFEB;
 }
 
+.scholarships-section .scholarship-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.scholarships-section .details-btn {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  margin-top: auto;
+}
+
 .status-message {
   text-align: center;
   color: var(--secondary);
