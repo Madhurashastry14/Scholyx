@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ScholarshipCard from "../components/ScholarshipCard";
 import ScholarshipFilters from "../components/ScholarshipFilters";
+import ActiveFilterChips from "../components/ActiveFilterChips";
 import { fetchScholarshipFilterOptions, fetchScholarships } from "../services/api";
 
 function Scholarships() {
@@ -95,6 +96,18 @@ function Scholarships() {
     setPage(1);
   };
 
+  const removeFilter = (key) => {
+    setFilters((previousFilters) => ({
+      ...previousFilters,
+      [key]: "",
+    }));
+    setAppliedFilters((previousFilters) => ({
+      ...previousFilters,
+      [key]: "",
+    }));
+    setPage(1);
+  };
+
   const clearFilters = () => {
     setFilters({
       category: "",
@@ -173,6 +186,13 @@ function Scholarships() {
 
               <button type="submit">Search</button>
             </form>
+
+            <ActiveFilterChips
+              filters={appliedFilters}
+              options={filterOptions}
+              onRemove={removeFilter}
+              onClearAll={clearFilters}
+            />
 
             {loading && (
               <p className="status-message">
