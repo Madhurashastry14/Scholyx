@@ -1,6 +1,10 @@
 from django.urls import path
 
-from .views import ScholarshipDetailView, ScholarshipListView
+from .views import (
+    ScholarshipDetailView,
+    ScholarshipFilterOptionsView,
+    ScholarshipListView,
+)
 
 
 urlpatterns = [
@@ -8,6 +12,11 @@ urlpatterns = [
         "scholarships/",
         ScholarshipListView.as_view(),
         name="scholarship-list",
+    ),
+    path(
+        "scholarships/filter-options/",
+        ScholarshipFilterOptionsView.as_view(),
+        name="scholarship-filter-options",
     ),
     path(
         "scholarships/<int:pk>/",

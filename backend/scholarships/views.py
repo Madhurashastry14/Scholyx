@@ -2,8 +2,10 @@ from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .models import Scholarship
+from .models import Category, Course, Scholarship, State
 from .serializers import (
     ScholarshipListSerializer,
     ScholarshipQuerySerializer,
@@ -90,4 +92,43 @@ class ScholarshipDetailView(generics.RetrieveAPIView):
                 "branch",
                 "required_documents",
             )
+        )
+
+
+OPTION_MODELS = {
+    "categories": Category,
+    "states": State,
+    "courses": Course,
+}
+
+
+def serialize_options(model):
+    options = []
+    seen_labels = set()
+    queryset = model.objects.filter(
+        scholarships__status=Scholarship.Status.ACTIVE
+    ).distinct()
+
+    for option in sorted(
+        queryset,
+        key=lambda item: (item.name.lower(), item.code is None),
+    ):
+        label_key = option.name.strip().lower()
+        if label_key in seen_labels:
+            continue
+        seen_labels.add(label_key)
+        options.append({"value": option.code or option.name, "label": option.name})
+
+    return options
+
+
+class ScholarshipFilterOptionsView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return Response(
+            {
+                key: serialize_options(model)
+                for key, model in OPTION_MODELS.items()
+            }
         )

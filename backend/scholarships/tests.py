@@ -372,3 +372,84 @@ class ScholarshipSearchAPITests(APITestCase):
 
         response = self.client.get(f"/api/scholarships/{inactive.pk}/")
         self.assertEqual(response.status_code, 404)
+
+
+class ScholarshipFilterOptionsTests(APITestCase):
+    def setUp(self):
+        self.url = reverse("scholarship-filter-options")
+
+    def create_scholarship(self, name, status=Scholarship.Status.ACTIVE):
+        return Scholarship.objects.create(
+            name=name,
+            provider="Provider",
+            description="Description",
+            amount=Decimal("1000.00"),
+            deadline="2027-06-30",
+            status=status,
+        )
+
+    def test_endpoint_is_public(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data,
+            {"categories": [], "states": [], "courses": []},
+        )
+
+    def test_returns_only_options_used_by_active_scholarships(self):
+        active = self.create_scholarship("Active")
+        self.create_scholarship("Draft", status=Scholarship.Status.DRAFT)
+        active.category.add(Category.objects.create(code="OBC", name="OBC"))
+        active.state.add(State.objects.create(code="KA", name="Karnataka"))
+        active.course.add(
+            Course.objects.create(code="BE_BTECH", name="Engineering")
+        )
+        Category.objects.create(code="SC", name="Scheduled Caste")
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data["categories"],
+            [{"value": "OBC", "label": "OBC"}],
+        )
+        self.assertEqual(
+            response.data["states"],
+            [{"value": "KA", "label": "Karnataka"}],
+        )
+        self.assertEqual(
+            response.data["courses"],
+            [{"value": "BE_BTECH", "label": "Engineering"}],
+        )
+
+    def test_uses_name_as_value_when_code_is_missing(self):
+        active = self.create_scholarship("Active")
+        active.category.add(Category.objects.create(name="General"))
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(
+            response.data["categories"],
+            [{"value": "General", "label": "General"}],
+        )
+
+    def test_options_are_ordered_by_label_and_deduplicated(self):
+        active = self.create_scholarship("Active")
+        active.state.add(State.objects.create(code="WB", name="West Bengal"))
+        active.state.add(
+            State.objects.create(code="AP", name="Andhra Pradesh")
+        )
+        active.state.add(
+            State.objects.create(code=None, name="Andhra Pradesh")
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(
+            response.data["states"],
+            [
+                {"value": "AP", "label": "Andhra Pradesh"},
+                {"value": "WB", "label": "West Bengal"},
+            ],
+        )
