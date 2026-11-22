@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/auth.js";
@@ -11,9 +12,7 @@ function Navbar() {
   const firstName = user?.full_name?.trim().split(/\s+/)[0];
 
   const handleLogout = async () => {
-    if (loggingOut) {
-      return;
-    }
+    if (loggingOut) return;
 
     setLoggingOut(true);
 
@@ -24,9 +23,11 @@ function Navbar() {
     }
   };
 
+  const closeMenu = () => setMenuOpen(false);
+
   return (
     <nav className="navbar">
-      <Link to="/" className="logo">
+      <Link to="/" className="logo" onClick={closeMenu}>
         <LogoMark />
         <span className="logo-word">
           Schol<span>yx</span>
@@ -43,28 +44,31 @@ function Navbar() {
       </button>
 
       <div className={`nav-links ${menuOpen ? "active" : ""}`}>
-        <Link to="/" onClick={() => setMenuOpen(false)}>
-          Home
-        </Link>
-        <Link to="/scholarships" onClick={() => setMenuOpen(false)}>
+        <Link to="/" onClick={closeMenu}>Home</Link>
+
+        <Link to="/scholarships" onClick={closeMenu}>
           Scholarships
         </Link>
-        <Link to="/about" onClick={() => setMenuOpen(false)}>
+
+        <Link to="/about" onClick={closeMenu}>
           About
         </Link>
 
         {status === "authenticated" ? (
           <div className="nav-user">
             {firstName && (
-              <span className="nav-user-name">Hi, {firstName}</span>
+              <span className="nav-user-name">
+                Hi, {firstName}
+              </span>
             )}
+
             <button
               type="button"
               className="nav-logout-btn"
               onClick={handleLogout}
               disabled={loggingOut}
             >
-              {loggingOut ? "Logging out…" : "Logout"}
+              {loggingOut ? "Logging out..." : "Logout"}
             </button>
           </div>
         ) : status === "loading" ? null : (
@@ -72,14 +76,15 @@ function Navbar() {
             <Link
               to="/login"
               className="login-btn"
-              onClick={() => setMenuOpen(false)}
+              onClick={closeMenu}
             >
               Login
             </Link>
+
             <Link
               to="/register"
               className="get-started-btn"
-              onClick={() => setMenuOpen(false)}
+              onClick={closeMenu}
             >
               Get Started
             </Link>
