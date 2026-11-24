@@ -1,8 +1,15 @@
 
 import { Link } from "react-router-dom";
 
+function formatCourse(course) {
+  if (Array.isArray(course)) {
+    return course.length > 0 ? course.join(", ") : "Not specified";
+  }
+  return course || "Not specified";
+}
+
 function ScholarshipCard({ scholarship }) {
-  const { id, name, provider, amount, deadline } = scholarship;
+  const { id, name, provider, course, deadline } = scholarship;
 
   return (
     <div className="scholarship-card">
@@ -19,8 +26,8 @@ function ScholarshipCard({ scholarship }) {
 
       <div className="card-details">
         <p>
-          <strong>Amount:</strong>{" "}
-          {amount ?? "Not specified"}
+          <strong>Course:</strong>{" "}
+          {formatCourse(course)}
         </p>
 
         <p>

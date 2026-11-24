@@ -68,6 +68,8 @@ class ScholarshipSerializer(serializers.ModelSerializer):
         ]
 
 class ScholarshipListSerializer(serializers.ModelSerializer):
+    course = serializers.StringRelatedField(many=True, read_only=True)
+
     class Meta:
         model = Scholarship
         fields = [
@@ -77,6 +79,7 @@ class ScholarshipListSerializer(serializers.ModelSerializer):
             "description",
             "amount",
             "deadline",
+            "course",
         ]
 
 
