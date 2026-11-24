@@ -297,7 +297,7 @@ export function parseLoginError(error) {
 }
 
 // PUBLIC SCHOLARSHIP LISTING API
-export function fetchScholarships(filters = {}) {
+export function fetchScholarships(filters = {}, { signal } = {}) {
   const params = new URLSearchParams();
 
   Object.entries(filters).forEach(([key, value]) => {
@@ -311,7 +311,7 @@ export function fetchScholarships(filters = {}) {
     ? `scholarships/?${queryString}`
     : "scholarships/";
 
-  return apiRequest(endpoint);
+  return apiRequest(endpoint, { signal });
 }
 
 // PUBLIC SCHOLARSHIP DETAIL API

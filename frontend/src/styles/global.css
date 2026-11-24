@@ -377,6 +377,54 @@ a:focus-visible > .logo-mark {
   gap: 22px;
 }
 
+.featured-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.featured-grid .scholarship-card {
+  padding: 20px;
+}
+
+.featured-grid .scholarship-card h3 {
+  font-size: 16px;
+}
+
+.featured-grid .card-details p {
+  font-size: 12px;
+}
+
+.featured-filter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: -22px 0 32px;
+}
+
+.featured-filter select {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--white);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.featured-filter select:focus {
+  outline: 2px solid var(--teal);
+  outline-offset: 1px;
+}
+
+@media (max-width: 1200px) and (min-width: 901px) {
+  .featured-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .scholarship-card {
   background: var(--white);
   border: 1px solid var(--border);
