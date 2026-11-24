@@ -11,47 +11,47 @@ const YEAR_LABELS = {
 
 function formatList(values) {
   if (!Array.isArray(values) || values.length === 0) {
-    return "Not specified";
+    return "";
   }
   return values.join(", ");
 }
 
 function formatBoolean(value, positive, negative) {
   if (value === null || value === undefined) {
-    return "Not specified";
+    return "";
   }
   return value ? positive : negative;
+}
+
+function formatAcademicScore(scholarship) {
+  if (scholarship.minimum_percentage != null) {
+    return `${scholarship.minimum_percentage}%`;
+  }
+  if (scholarship.minimum_cgpa != null) {
+    return `${scholarship.minimum_cgpa} / 10 CGPA`;
+  }
+  return "";
 }
 
 function EligibilityCriteria({ scholarship }) {
   const criteria = [
     {
-      label: "Minimum academic percentage",
-      value:
-        scholarship.minimum_percentage != null
-          ? `${scholarship.minimum_percentage}%`
-          : "Not specified",
-    },
-    {
-      label: "Minimum CGPA",
-      value:
-        scholarship.minimum_cgpa != null
-          ? `${scholarship.minimum_cgpa} / 10`
-          : "Not specified",
+      label: "Minimum academic score",
+      value: formatAcademicScore(scholarship),
     },
     {
       label: "Maximum family income",
       value:
         scholarship.maximum_family_income != null
           ? `₹${Number(scholarship.maximum_family_income).toLocaleString("en-IN")} per year`
-          : "Not specified",
+          : "",
     },
     {
       label: "Age limit",
       value:
         scholarship.minimum_age != null || scholarship.maximum_age != null
           ? `${scholarship.minimum_age ?? "No minimum"} – ${scholarship.maximum_age ?? "No maximum"} years`
-          : "Not specified",
+          : "",
     },
     {
       label: "Gender",
@@ -61,7 +61,7 @@ function EligibilityCriteria({ scholarship }) {
             scholarship.gender.slice(1)
           : scholarship.gender === "any"
             ? "Any gender"
-            : "Not specified",
+            : "",
     },
     { label: "Category", value: formatList(scholarship.category) },
     { label: "State", value: formatList(scholarship.state) },
@@ -73,7 +73,7 @@ function EligibilityCriteria({ scholarship }) {
       value: scholarship.year_of_study
         ? YEAR_LABELS[scholarship.year_of_study] ||
           scholarship.year_of_study
-        : "Not specified",
+        : "",
     },
     {
       label: "Students with disabilities",
@@ -83,7 +83,7 @@ function EligibilityCriteria({ scholarship }) {
       label: "Minority students",
       value: formatBoolean(scholarship.minority, "Eligible", "Not required"),
     },
-  ];
+  ].filter(({ value }) => value);
 
   return (
     <section className="details-card" aria-labelledby="eligibility-title">
@@ -94,16 +94,20 @@ function EligibilityCriteria({ scholarship }) {
           <p>Review the requirements before you apply.</p>
         </div>
       </div>
-      <dl className="criteria-grid">
-        {criteria.map(({ label, value }) => (
-          <div className="criteria-item" key={label}>
-            <dt>{label}</dt>
-            <dd className={value === "Not specified" ? "unspecified" : ""}>
-              {value}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      {criteria.length > 0 ? (
+        <dl className="criteria-grid">
+          {criteria.map(({ label, value }) => (
+            <div className="criteria-item" key={label}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : (
+        <p className="criteria-empty">
+          No specific eligibility criteria are listed for this scholarship.
+        </p>
+      )}
     </section>
   );
 }

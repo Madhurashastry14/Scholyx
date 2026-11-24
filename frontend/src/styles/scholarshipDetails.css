@@ -159,11 +159,10 @@
   overflow-wrap: anywhere;
 }
 
-.criteria-item dd.unspecified {
-  color: #94A3B8;
-  font-size: 12px;
-  font-style: italic;
-  font-weight: 500;
+.criteria-empty {
+  color: var(--secondary);
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .document-list {

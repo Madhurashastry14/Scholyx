@@ -3,13 +3,22 @@ import { Link } from "react-router-dom";
 
 function formatCourse(course) {
   if (Array.isArray(course)) {
-    return course.length > 0 ? course.join(", ") : "Not specified";
+    return course.length > 0 ? course.join(", ") : "";
   }
-  return course || "Not specified";
+  return course || "";
 }
 
 function ScholarshipCard({ scholarship }) {
   const { id, name, provider, course, deadline } = scholarship;
+
+  const details = [];
+  const courseLabel = formatCourse(course);
+  if (courseLabel) {
+    details.push({ label: "Course", value: courseLabel });
+  }
+  if (deadline) {
+    details.push({ label: "Deadline", value: deadline });
+  }
 
   return (
     <div className="scholarship-card">
@@ -24,17 +33,16 @@ function ScholarshipCard({ scholarship }) {
         {provider || "Scholarship Provider"}
       </p>
 
-      <div className="card-details">
-        <p>
-          <strong>Course:</strong>{" "}
-          {formatCourse(course)}
-        </p>
-
-        <p>
-          <strong>Deadline:</strong>{" "}
-          {deadline || "Not specified"}
-        </p>
-      </div>
+      {details.length > 0 && (
+        <div className="card-details">
+          {details.map(({ label, value }) => (
+            <p key={label}>
+              <strong>{label}:</strong>{" "}
+              {value}
+            </p>
+          ))}
+        </div>
+      )}
 
       <Link
         to={`/scholarships/${id}`}
